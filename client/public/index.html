@@ -3,18 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#2196f3" />
-    <meta name="description" content="Local AirDrop - Cross-platform file transfer" />
+    <meta name="theme-color" content="#f2cc0d" />
+    <meta name="description" content="Yellow Share — Transfer files across any OS on the same WiFi" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>Local AirDrop</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica',
-          'Arial', sans-serif;
-      }
-    </style>
+    <title>Yellow Share</title>
+    <script>
+      // Polyfill for simple-peer which requires process global
+      window.process = window.process || { env: {}, version: '', nextTick: function(cb) { setTimeout(cb, 0); } };
+      window.global = window.global || window;
+      window.Buffer = window.Buffer || { isBuffer: function() { return false; } };
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
