@@ -2,7 +2,7 @@ import Peer from 'simple-peer';
 
 const iceServers = [
   { urls: 'stun:stun.l.google.com:19302' },
-  // Add TURN servers here for NAT traversal
+  { urls: 'stun:stun1.l.google.com:19302' }
 ];
 
 export function createPeer(isInitiator, roomId) {
@@ -13,19 +13,43 @@ export function createPeer(isInitiator, roomId) {
   });
 
   // Setup WebSocket signaling
-  const ws = new WebSocket(`ws://localhost:3001/ws?room=${roomId}`);
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = window.location.hostname;
+  const port = window.location.port || (window.location.protocol === 'https:' ? 443 : 80);
+  const wsUrl = `${protocol}//${host}:3001/ws?room=${roomId}`;
+  
+  const ws = new WebSocket(wsUrl);
+
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  };
 
   peer.on('signal', data => {
-    ws.send(JSON.stringify(data));
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(data));
+    }
+  });
+
+  peer.on('close', () => {
+    ws.close();
   });
 
   ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    peer.signal(data);
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type) {
+        peer.signal(data);
+      }
+    } catch (err) {
+      console.error('Failed to parse signaling message:', err);
+    }
   };
 
   return {
     peer,
-    cleanup: () => ws.close()
+    cleanup: () => {
+      ws.close();
+      peer.destroy();
+    }
   };
 }
